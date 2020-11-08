@@ -9,6 +9,15 @@ package stock;
  *
  * @author LENOVO KNS
  */
+import java.sql.*;
+import java.util.*;
+import javax.swing.*;
+import java.awt.*;
+import java.util.logging.Level;
+import java.util.logging.Logger;
+import javax.swing.table.DefaultTableModel;
+import javax.swing.table.TableRowSorter;
+
 public class customer extends javax.swing.JFrame {
 
     /**
@@ -16,6 +25,53 @@ public class customer extends javax.swing.JFrame {
      */
     public customer() {
         initComponents();
+        Connect();
+        load();
+    }
+    Connection con;
+    PreparedStatement pst;
+    DefaultTableModel def;
+
+    public void Connect() {
+        //เชื่อม Database
+        try {
+            Class.forName("com.mysql.jdbc.Driver");
+            con = DriverManager.getConnection("jdbc:mysql://localhost/stockmansys", "root", "");//เชื่อม Database ชื่อ stockmansys
+        } catch (ClassNotFoundException ex) {
+            Logger.getLogger(customer.class.getName()).log(Level.SEVERE, null, ex);
+        } catch (SQLException ex) {
+            Logger.getLogger(customer.class.getName()).log(Level.SEVERE, null, ex);
+            JOptionPane.showMessageDialog(this, "ไม่สามารถเชื่อมต่อฐานข้อมูลได้กรุณาลองใหม่อีกครั้ง");
+        }
+    }
+
+    public void load() {
+        try {
+            //แสดงผลบน JTable
+            pst = con.prepareStatement("select * from customer");
+            ResultSet result = pst.executeQuery();
+
+            ResultSetMetaData rd = result.getMetaData();
+
+            int a = rd.getColumnCount();
+
+            def = (DefaultTableModel) customer.getModel();
+            def.setRowCount(0);
+
+            while (result.next()) {
+                Vector vec = new Vector();
+                for (int i = 1; i <= a; i++) {
+                    vec.add(result.getString("idcus"));
+                    vec.add(result.getString("name"));
+                    vec.add(result.getString("tel"));
+                    vec.add(result.getString("other"));
+                }
+                def.addRow(vec);//เพิ่มข้อฒูลลงบน Jtable ROW
+            }
+
+        } catch (SQLException ex) {
+            Logger.getLogger(product.class.getName()).log(Level.SEVERE, null, ex);
+        }
     }
 
     /**
@@ -32,16 +88,20 @@ public class customer extends javax.swing.JFrame {
         jLabel1 = new javax.swing.JLabel();
         jLabel2 = new javax.swing.JLabel();
         jLabel3 = new javax.swing.JLabel();
-        jTextField1 = new javax.swing.JTextField();
-        jTextField2 = new javax.swing.JTextField();
-        jTextField3 = new javax.swing.JTextField();
+        cusname = new javax.swing.JTextField();
+        telnum = new javax.swing.JTextField();
+        other = new javax.swing.JTextField();
+        addbtn = new javax.swing.JButton();
+        deletebtn = new javax.swing.JButton();
+        cancaelbtn = new javax.swing.JButton();
+        editbtn = new javax.swing.JButton();
         jPanel3 = new javax.swing.JPanel();
         jScrollPane1 = new javax.swing.JScrollPane();
-        jTable1 = new javax.swing.JTable();
-        jButton1 = new javax.swing.JButton();
-        jButton2 = new javax.swing.JButton();
-        jButton3 = new javax.swing.JButton();
+        customer = new javax.swing.JTable();
         closebtn = new javax.swing.JButton();
+        jPanel4 = new javax.swing.JPanel();
+        jLabel4 = new javax.swing.JLabel();
+        searchcus = new javax.swing.JTextField();
 
         setDefaultCloseOperation(javax.swing.WindowConstants.EXIT_ON_CLOSE);
         setUndecorated(true);
@@ -60,6 +120,42 @@ public class customer extends javax.swing.JFrame {
         jLabel3.setFont(new java.awt.Font("Angsana New", 1, 24)); // NOI18N
         jLabel3.setText("อื่นๆ");
 
+        addbtn.setFont(new java.awt.Font("Angsana New", 1, 24)); // NOI18N
+        addbtn.setIcon(new javax.swing.ImageIcon(getClass().getResource("/stock/icon/Add.png"))); // NOI18N
+        addbtn.setText("เพิ่ม");
+        addbtn.addActionListener(new java.awt.event.ActionListener() {
+            public void actionPerformed(java.awt.event.ActionEvent evt) {
+                addbtnActionPerformed(evt);
+            }
+        });
+
+        deletebtn.setFont(new java.awt.Font("Angsana New", 1, 24)); // NOI18N
+        deletebtn.setIcon(new javax.swing.ImageIcon(getClass().getResource("/stock/icon/del.png"))); // NOI18N
+        deletebtn.setText("ลบ");
+        deletebtn.addActionListener(new java.awt.event.ActionListener() {
+            public void actionPerformed(java.awt.event.ActionEvent evt) {
+                deletebtnActionPerformed(evt);
+            }
+        });
+
+        cancaelbtn.setFont(new java.awt.Font("Angsana New", 1, 24)); // NOI18N
+        cancaelbtn.setIcon(new javax.swing.ImageIcon(getClass().getResource("/stock/icon/cancel.png"))); // NOI18N
+        cancaelbtn.setText("ยกเลิก");
+        cancaelbtn.addActionListener(new java.awt.event.ActionListener() {
+            public void actionPerformed(java.awt.event.ActionEvent evt) {
+                cancaelbtnActionPerformed(evt);
+            }
+        });
+
+        editbtn.setFont(new java.awt.Font("Angsana New", 1, 24)); // NOI18N
+        editbtn.setIcon(new javax.swing.ImageIcon(getClass().getResource("/stock/icon/Edit.png"))); // NOI18N
+        editbtn.setText("แก้ไข");
+        editbtn.addActionListener(new java.awt.event.ActionListener() {
+            public void actionPerformed(java.awt.event.ActionEvent evt) {
+                editbtnActionPerformed(evt);
+            }
+        });
+
         javax.swing.GroupLayout jPanel2Layout = new javax.swing.GroupLayout(jPanel2);
         jPanel2.setLayout(jPanel2Layout);
         jPanel2Layout.setHorizontalGroup(
@@ -73,13 +169,25 @@ public class customer extends javax.swing.JFrame {
                             .addComponent(jLabel1))
                         .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.UNRELATED)
                         .addGroup(jPanel2Layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
-                            .addComponent(jTextField1, javax.swing.GroupLayout.DEFAULT_SIZE, 213, Short.MAX_VALUE)
-                            .addComponent(jTextField2)))
-                    .addGroup(javax.swing.GroupLayout.Alignment.TRAILING, jPanel2Layout.createSequentialGroup()
+                            .addComponent(cusname)
+                            .addComponent(telnum)))
+                    .addGroup(jPanel2Layout.createSequentialGroup()
                         .addComponent(jLabel3)
                         .addGap(18, 18, 18)
-                        .addComponent(jTextField3)))
+                        .addComponent(other))
+                    .addGroup(jPanel2Layout.createSequentialGroup()
+                        .addGap(49, 49, 49)
+                        .addComponent(addbtn)
+                        .addGap(18, 18, 18)
+                        .addComponent(deletebtn)
+                        .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.UNRELATED)
+                        .addComponent(editbtn)
+                        .addGap(0, 0, Short.MAX_VALUE)))
                 .addContainerGap())
+            .addGroup(javax.swing.GroupLayout.Alignment.TRAILING, jPanel2Layout.createSequentialGroup()
+                .addContainerGap(javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE)
+                .addComponent(cancaelbtn, javax.swing.GroupLayout.PREFERRED_SIZE, 115, javax.swing.GroupLayout.PREFERRED_SIZE)
+                .addGap(143, 143, 143))
         );
         jPanel2Layout.setVerticalGroup(
             jPanel2Layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
@@ -87,31 +195,38 @@ public class customer extends javax.swing.JFrame {
                 .addContainerGap()
                 .addGroup(jPanel2Layout.createParallelGroup(javax.swing.GroupLayout.Alignment.BASELINE)
                     .addComponent(jLabel1)
-                    .addComponent(jTextField1, javax.swing.GroupLayout.PREFERRED_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.PREFERRED_SIZE))
+                    .addComponent(cusname, javax.swing.GroupLayout.PREFERRED_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.PREFERRED_SIZE))
                 .addGap(18, 18, 18)
                 .addGroup(jPanel2Layout.createParallelGroup(javax.swing.GroupLayout.Alignment.BASELINE)
                     .addComponent(jLabel2)
-                    .addComponent(jTextField2, javax.swing.GroupLayout.PREFERRED_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.PREFERRED_SIZE))
+                    .addComponent(telnum, javax.swing.GroupLayout.PREFERRED_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.PREFERRED_SIZE))
                 .addGap(18, 18, 18)
                 .addGroup(jPanel2Layout.createParallelGroup(javax.swing.GroupLayout.Alignment.BASELINE)
-                    .addComponent(jTextField3, javax.swing.GroupLayout.PREFERRED_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.PREFERRED_SIZE)
+                    .addComponent(other, javax.swing.GroupLayout.PREFERRED_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.PREFERRED_SIZE)
                     .addComponent(jLabel3))
-                .addContainerGap(40, Short.MAX_VALUE))
+                .addGap(18, 18, 18)
+                .addGroup(jPanel2Layout.createParallelGroup(javax.swing.GroupLayout.Alignment.BASELINE)
+                    .addComponent(deletebtn)
+                    .addComponent(addbtn)
+                    .addComponent(editbtn))
+                .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.UNRELATED)
+                .addComponent(cancaelbtn)
+                .addContainerGap(javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE))
         );
 
-        jTable1.setModel(new javax.swing.table.DefaultTableModel(
+        customer.setModel(new javax.swing.table.DefaultTableModel(
             new Object [][] {
 
             },
             new String [] {
-                "ชื่อ", "เบอร์", "อื่นๆ"
+                "รหัสลูกค้า", "ชื่อ", "เบอร์", "อื่นๆ"
             }
         ) {
             Class[] types = new Class [] {
-                java.lang.String.class, java.lang.String.class, java.lang.String.class
+                java.lang.Integer.class, java.lang.String.class, java.lang.String.class, java.lang.String.class
             };
             boolean[] canEdit = new boolean [] {
-                false, false, false
+                false, false, false, false
             };
 
             public Class getColumnClass(int columnIndex) {
@@ -122,7 +237,12 @@ public class customer extends javax.swing.JFrame {
                 return canEdit [columnIndex];
             }
         });
-        jScrollPane1.setViewportView(jTable1);
+        customer.addMouseListener(new java.awt.event.MouseAdapter() {
+            public void mouseClicked(java.awt.event.MouseEvent evt) {
+                customerMouseClicked(evt);
+            }
+        });
+        jScrollPane1.setViewportView(customer);
 
         javax.swing.GroupLayout jPanel3Layout = new javax.swing.GroupLayout(jPanel3);
         jPanel3.setLayout(jPanel3Layout);
@@ -134,22 +254,8 @@ public class customer extends javax.swing.JFrame {
         );
         jPanel3Layout.setVerticalGroup(
             jPanel3Layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
-            .addGroup(jPanel3Layout.createSequentialGroup()
-                .addComponent(jScrollPane1, javax.swing.GroupLayout.PREFERRED_SIZE, 408, javax.swing.GroupLayout.PREFERRED_SIZE)
-                .addGap(0, 0, Short.MAX_VALUE))
+            .addComponent(jScrollPane1, javax.swing.GroupLayout.DEFAULT_SIZE, 408, Short.MAX_VALUE)
         );
-
-        jButton1.setFont(new java.awt.Font("Angsana New", 1, 24)); // NOI18N
-        jButton1.setIcon(new javax.swing.ImageIcon(getClass().getResource("/stock/icon/Add.png"))); // NOI18N
-        jButton1.setText("เพิ่ม");
-
-        jButton2.setFont(new java.awt.Font("Angsana New", 1, 24)); // NOI18N
-        jButton2.setIcon(new javax.swing.ImageIcon(getClass().getResource("/stock/icon/Edit.png"))); // NOI18N
-        jButton2.setText("แก้ไข");
-
-        jButton3.setFont(new java.awt.Font("Angsana New", 1, 24)); // NOI18N
-        jButton3.setIcon(new javax.swing.ImageIcon(getClass().getResource("/stock/icon/del.png"))); // NOI18N
-        jButton3.setText("ลบ");
 
         closebtn.setFont(new java.awt.Font("Angsana New", 1, 24)); // NOI18N
         closebtn.setIcon(new javax.swing.ImageIcon(getClass().getResource("/stock/icon/Exit.png"))); // NOI18N
@@ -160,26 +266,49 @@ public class customer extends javax.swing.JFrame {
             }
         });
 
+        jLabel4.setFont(new java.awt.Font("Angsana New", 1, 24)); // NOI18N
+        jLabel4.setText("ช่องค้นหา");
+
+        searchcus.addKeyListener(new java.awt.event.KeyAdapter() {
+            public void keyReleased(java.awt.event.KeyEvent evt) {
+                searchcusKeyReleased(evt);
+            }
+        });
+
+        javax.swing.GroupLayout jPanel4Layout = new javax.swing.GroupLayout(jPanel4);
+        jPanel4.setLayout(jPanel4Layout);
+        jPanel4Layout.setHorizontalGroup(
+            jPanel4Layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
+            .addGroup(jPanel4Layout.createSequentialGroup()
+                .addContainerGap()
+                .addComponent(jLabel4)
+                .addGap(18, 18, 18)
+                .addComponent(searchcus, javax.swing.GroupLayout.PREFERRED_SIZE, 296, javax.swing.GroupLayout.PREFERRED_SIZE)
+                .addContainerGap(23, Short.MAX_VALUE))
+        );
+        jPanel4Layout.setVerticalGroup(
+            jPanel4Layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
+            .addGroup(jPanel4Layout.createSequentialGroup()
+                .addContainerGap()
+                .addGroup(jPanel4Layout.createParallelGroup(javax.swing.GroupLayout.Alignment.BASELINE)
+                    .addComponent(jLabel4)
+                    .addComponent(searchcus, javax.swing.GroupLayout.PREFERRED_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.PREFERRED_SIZE))
+                .addContainerGap(javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE))
+        );
+
         javax.swing.GroupLayout jPanel1Layout = new javax.swing.GroupLayout(jPanel1);
         jPanel1.setLayout(jPanel1Layout);
         jPanel1Layout.setHorizontalGroup(
             jPanel1Layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
             .addGroup(javax.swing.GroupLayout.Alignment.TRAILING, jPanel1Layout.createSequentialGroup()
+                .addContainerGap(55, Short.MAX_VALUE)
                 .addGroup(jPanel1Layout.createParallelGroup(javax.swing.GroupLayout.Alignment.TRAILING)
+                    .addComponent(closebtn)
                     .addGroup(jPanel1Layout.createSequentialGroup()
-                        .addContainerGap(javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE)
-                        .addComponent(closebtn))
-                    .addGroup(jPanel1Layout.createSequentialGroup()
-                        .addGap(55, 55, 55)
-                        .addGroup(jPanel1Layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
-                            .addGroup(jPanel1Layout.createSequentialGroup()
-                                .addComponent(jButton1)
-                                .addGap(18, 18, 18)
-                                .addComponent(jButton2)
-                                .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.UNRELATED)
-                                .addComponent(jButton3))
-                            .addComponent(jPanel2, javax.swing.GroupLayout.PREFERRED_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.PREFERRED_SIZE))
-                        .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED, 65, Short.MAX_VALUE)
+                        .addGroup(jPanel1Layout.createParallelGroup(javax.swing.GroupLayout.Alignment.TRAILING, false)
+                            .addComponent(jPanel2, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE)
+                            .addComponent(jPanel4, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE))
+                        .addGap(24, 24, 24)
                         .addComponent(jPanel3, javax.swing.GroupLayout.PREFERRED_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.PREFERRED_SIZE)))
                 .addGap(55, 55, 55))
         );
@@ -192,12 +321,9 @@ public class customer extends javax.swing.JFrame {
                 .addGroup(jPanel1Layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
                     .addComponent(jPanel3, javax.swing.GroupLayout.PREFERRED_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.PREFERRED_SIZE)
                     .addGroup(jPanel1Layout.createSequentialGroup()
-                        .addComponent(jPanel2, javax.swing.GroupLayout.PREFERRED_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.PREFERRED_SIZE)
-                        .addGap(18, 18, 18)
-                        .addGroup(jPanel1Layout.createParallelGroup(javax.swing.GroupLayout.Alignment.BASELINE)
-                            .addComponent(jButton2)
-                            .addComponent(jButton3)
-                            .addComponent(jButton1))))
+                        .addComponent(jPanel2, javax.swing.GroupLayout.PREFERRED_SIZE, 310, javax.swing.GroupLayout.PREFERRED_SIZE)
+                        .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED, javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE)
+                        .addComponent(jPanel4, javax.swing.GroupLayout.PREFERRED_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.PREFERRED_SIZE)))
                 .addContainerGap(55, Short.MAX_VALUE))
         );
 
@@ -205,7 +331,9 @@ public class customer extends javax.swing.JFrame {
         getContentPane().setLayout(layout);
         layout.setHorizontalGroup(
             layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
-            .addComponent(jPanel1, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE)
+            .addGroup(layout.createSequentialGroup()
+                .addComponent(jPanel1, javax.swing.GroupLayout.PREFERRED_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.PREFERRED_SIZE)
+                .addGap(0, 24, Short.MAX_VALUE))
         );
         layout.setVerticalGroup(
             layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
@@ -217,9 +345,127 @@ public class customer extends javax.swing.JFrame {
     }// </editor-fold>//GEN-END:initComponents
 
     private void closebtnActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_closebtnActionPerformed
-        // TODO add your handling code here:
+        //ปิดหน้าต่าง
         this.setVisible(false);
     }//GEN-LAST:event_closebtnActionPerformed
+
+    private void editbtnActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_editbtnActionPerformed
+        //ปุ่มแก้ไข
+        def = (DefaultTableModel) customer.getModel();
+        int selector = customer.getSelectedRow();
+        int num = Integer.parseInt(def.getValueAt(selector, 0).toString());//เลือกข้อมูลจากลำดับของสินค้า
+
+        try {
+            String name = cusname.getText();
+            String phone = telnum.getText();
+            String ot = other.getText();
+
+            pst = con.prepareStatement("update product set name = ?, tel = ?, other = ?, where idcus = ?");
+            pst.setString(1, name);
+            pst.setString(2, phone);
+            pst.setString(3, ot);
+            pst.setInt(4, num);
+            pst.executeUpdate();//Update to Database
+
+            JOptionPane.showMessageDialog(this, "แก้ไขข้อมูลสำเร็จ");
+
+            cusname.setText("");
+            telnum.setText("");
+            other.setText("");
+
+            cusname.requestFocus();
+
+            load();
+        } catch (SQLException ex) {
+            Logger.getLogger(product.class.getName()).log(Level.SEVERE, null, ex);
+            JOptionPane.showMessageDialog(this, "NO");
+        }
+    }//GEN-LAST:event_editbtnActionPerformed
+
+    private void addbtnActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_addbtnActionPerformed
+        //ปุ่มเพิ่มข้อมูล
+        try {
+            String name = cusname.getText();
+            String phone = telnum.getText();
+            String ot = other.getText();
+            
+            pst = con.prepareStatement("insert into customer(name,tel,other)value(?,?,?)");
+            pst.setString(1, name);
+            pst.setString(2, phone);
+            pst.setString(3, ot);
+            pst.executeUpdate();//Update to Database
+
+            JOptionPane.showMessageDialog(this, "เพิ่มข้อมูลสำเร็จ");
+
+            cusname.setText("");
+            telnum.setText("");
+            other.setText("");
+
+            cusname.requestFocus();
+
+            load();
+        } catch (SQLException ex) {
+            Logger.getLogger(product.class.getName()).log(Level.SEVERE, null, ex);
+        }
+    }//GEN-LAST:event_addbtnActionPerformed
+
+    private void deletebtnActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_deletebtnActionPerformed
+        //ปุ่มลบข้อมูล
+        def = (DefaultTableModel) customer.getModel();
+        int selector = customer.getSelectedRow();
+        int num = Integer.parseInt(def.getValueAt(selector, 0).toString());//เลือกข้อมูลจากลำดับของสินค้า
+
+        try {
+
+            pst = con.prepareStatement("delete from customer where idcus = ?");
+            pst.setInt(1, num);
+            pst.executeUpdate();//Update to Database
+
+            JOptionPane.showMessageDialog(this, "ลบข้อมูลสำเร็จ");
+
+            cusname.setText("");
+            telnum.setText("");
+            other.setText("");
+
+            cusname.requestFocus();
+
+            load();
+        } catch (SQLException ex) {
+            Logger.getLogger(product.class.getName()).log(Level.SEVERE, null, ex);
+        }
+    }//GEN-LAST:event_deletebtnActionPerformed
+
+    private void customerMouseClicked(java.awt.event.MouseEvent evt) {//GEN-FIRST:event_customerMouseClicked
+        // แสดงผลบน Text field ให้ถูกต้อง
+        addbtn.setEnabled(false);
+        def = (DefaultTableModel) customer.getModel();
+        int selector = customer.getSelectedRow();
+        int num = Integer.parseInt(def.getValueAt(selector, 0).toString());//เลือกข้อมูลจากลำดับของสินค้า
+        //ข้อมูลแสดงผลบน TextField ของแต่ละอัน
+        cusname.setText(def.getValueAt(selector, 1).toString());
+        telnum.setText(def.getValueAt(selector, 2).toString());
+        other.setText(def.getValueAt(selector, 3).toString());
+
+    }//GEN-LAST:event_customerMouseClicked
+
+    private void cancaelbtnActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_cancaelbtnActionPerformed
+        //ปุ่มยกเลิก
+        cusname.setText("");
+        telnum.setText("");
+        other.setText("");
+
+        cusname.requestFocus();
+
+        addbtn.setEnabled(true);
+    }//GEN-LAST:event_cancaelbtnActionPerformed
+
+    private void searchcusKeyReleased(java.awt.event.KeyEvent evt) {//GEN-FIRST:event_searchcusKeyReleased
+        //ช่องค้นหา
+        TableRowSorter<DefaultTableModel> trs = new TableRowSorter<DefaultTableModel>(def);
+        customer.setRowSorter(trs);
+        trs.setRowFilter(RowFilter.regexFilter(searchcus.getText()));
+        
+    }//GEN-LAST:event_searchcusKeyReleased
 
     /**
      * @param args the command line arguments
@@ -257,20 +503,24 @@ public class customer extends javax.swing.JFrame {
     }
 
     // Variables declaration - do not modify//GEN-BEGIN:variables
+    private javax.swing.JButton addbtn;
+    private javax.swing.JButton cancaelbtn;
     private javax.swing.JButton closebtn;
-    private javax.swing.JButton jButton1;
-    private javax.swing.JButton jButton2;
-    private javax.swing.JButton jButton3;
+    private javax.swing.JTextField cusname;
+    private javax.swing.JTable customer;
+    private javax.swing.JButton deletebtn;
+    private javax.swing.JButton editbtn;
     private javax.swing.JLabel jLabel1;
     private javax.swing.JLabel jLabel2;
     private javax.swing.JLabel jLabel3;
+    private javax.swing.JLabel jLabel4;
     private javax.swing.JPanel jPanel1;
     private javax.swing.JPanel jPanel2;
     private javax.swing.JPanel jPanel3;
+    private javax.swing.JPanel jPanel4;
     private javax.swing.JScrollPane jScrollPane1;
-    private javax.swing.JTable jTable1;
-    private javax.swing.JTextField jTextField1;
-    private javax.swing.JTextField jTextField2;
-    private javax.swing.JTextField jTextField3;
+    private javax.swing.JTextField other;
+    private javax.swing.JTextField searchcus;
+    private javax.swing.JTextField telnum;
     // End of variables declaration//GEN-END:variables
 }
