@@ -18,32 +18,33 @@ import java.util.logging.Logger;
 import javax.swing.table.DefaultTableModel;
 import javax.swing.table.TableRowSorter;
 
-public class customer extends javax.swing.JFrame {
+public class customer extends javax.swing.JFrame{
 
     /**
      * Creates new form customer
      */
     public customer() {
         initComponents();
-        Connect();
+        DataCustomer dataC = new DataCustomer();
+        dataC.Connect();
         load();
     }
     Connection con;
     PreparedStatement pst;
     DefaultTableModel def;
 
-    public void Connect() {
-        //เชื่อม Database
-        try {
-            Class.forName("com.mysql.jdbc.Driver");
-            con = DriverManager.getConnection("jdbc:mysql://localhost/stockmansys", "root", "");//เชื่อม Database ชื่อ stockmansys
-        } catch (ClassNotFoundException ex) {
-            Logger.getLogger(customer.class.getName()).log(Level.SEVERE, null, ex);
-        } catch (SQLException ex) {
-            Logger.getLogger(customer.class.getName()).log(Level.SEVERE, null, ex);
-            JOptionPane.showMessageDialog(this, "ไม่สามารถเชื่อมต่อฐานข้อมูลได้กรุณาลองใหม่อีกครั้ง");
-        }
-    }
+//    public void Connect() {
+//        //เชื่อม Database
+//        try {
+//            Class.forName("com.mysql.jdbc.Driver");
+//            con = DriverManager.getConnection("jdbc:mysql://localhost/stockmansys", "root", "");//เชื่อม Database ชื่อ stockmansys
+//        } catch (ClassNotFoundException ex) {
+//            Logger.getLogger(customer.class.getName()).log(Level.SEVERE, null, ex);
+//        } catch (SQLException ex) {
+//            Logger.getLogger(customer.class.getName()).log(Level.SEVERE, null, ex);
+//            JOptionPane.showMessageDialog(this, "ไม่สามารถเชื่อมต่อฐานข้อมูลได้กรุณาลองใหม่อีกครั้ง");
+//        }
+//    }
 
     public void load() {
         try {
